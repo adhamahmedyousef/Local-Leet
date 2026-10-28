@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Local Leet",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Country contest ranks beside LeetCode's Global Ranking. Automatic data updates. Built By VoidHub.",
   "homepage_url": "https://voidhub.co",
   "permissions": ["storage", "alarms"],

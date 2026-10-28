@@ -62,10 +62,53 @@ test('details are clickable, keyboard dismissible, and explain the snapshot scop
   assert.equal(details.hidden, false);
   assert.match(details.textContent, /28 Oct 2026/);
   assert.match(details.textContent, /declaring that country/);
+  assert.match(button.title, /updated every two days/);
+  assert.match(details.textContent, /updated every two days/);
   assert.equal(button.getAttribute('aria-expanded'), 'true');
   document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
   assert.equal(details.hidden, true);
   assert.equal(document.activeElement, button);
+});
+
+for (const level of ['Knight', 'Guardian']) test(`${level} layout preserves native nodes and restores inline placement after resize`, t => {
+  const dom = new JSDOM(`<main><section id="card"><div id="pane"><div><div><div id="row">
+    <div>Contest Rating</div><div id="badge"><img alt="contest badge"></div><div id="level">Level ${level}</div>
+    <div id="global"><div>Global Ranking</div><div>2<span>/889,290</span></div></div><div>Attended</div>
+    </div></div><div class="rating-contest-graph"></div></div></div><div id="divider"></div>
+    <div id="top" style="min-width:200px">Top 0.01%</div></section></main>`, { runScripts: 'outside-only' });
+  t.after(() => dom.window.close());
+  const { document } = dom.window;
+  dom.window.eval(core);
+  const api = dom.window.LocalLeetProfile;
+  const anchor = api.locateGlobalRank(document);
+  const native = ['badge', 'level'].map(id => document.getElementById(id));
+  const graph = document.querySelector('.rating-contest-graph');
+  const graphParent = graph.parentElement;
+  let rowWidth = 380;
+  anchor.row.getBoundingClientRect = () => ({ width: rowWidth });
+  for (const node of anchor.row.children) node.getBoundingClientRect = () => ({ width: 70 });
+  document.getElementById('divider').getBoundingClientRect = () => ({ width: 33 });
+  const card = document.getElementById('card');
+  Object.defineProperty(card, 'clientWidth', { configurable: true, value: 836 });
+  const view = api.createRank(document, anchor, () => {});
+  view.host.getBoundingClientRect = () => ({ width: 100 });
+  api.updateRank(view, api.describe(result, 108215));
+  assert.equal(view.host.dataset.llPlacement, 'inline');
+  assert.equal(card.style.getPropertyValue('--ll-stats-width'), '450px');
+  Object.defineProperty(card, 'clientWidth', { configurable: true, value: 500 });
+  api.layoutRank(view);
+  assert.equal(view.host.dataset.llPlacement, 'compact');
+  assert.equal(view.host.parentElement, anchor.block);
+  assert.equal(api.readGlobalRank(anchor), 2);
+  rowWidth = 700;
+  api.layoutRank(view);
+  assert.equal(view.host.parentElement, anchor.row);
+  for (const node of native) assert.equal(node.parentElement, anchor.row);
+  assert.equal(graph.parentElement, graphParent);
+  api.destroyRank(view);
+  assert.equal(document.querySelector('[data-local-leet]'), null);
+  assert.equal(anchor.row.hasAttribute('data-local-leet-row'), false);
+  assert.equal(card.style.getPropertyValue('--ll-stats-width'), '');
 });
 
 test('unknown country and missing user never fabricate a rank', async t => {

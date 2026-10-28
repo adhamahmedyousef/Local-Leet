@@ -1,5 +1,14 @@
-[data-local-leet-row] { flex-wrap: wrap; row-gap: 8px; }
+[data-local-leet-row] { flex-wrap: nowrap; }
+[data-local-leet-row] > * { flex-shrink: 0; }
+[data-local-leet-row][data-local-leet-layout="compact"] > :not(:last-child) { margin-right: 8px; }
+[data-local-leet-card] > [data-local-leet-pane="rating"] { min-width: var(--ll-stats-width); }
 [data-local-leet].ll-rank { flex: none; position: relative; }
+[data-local-leet][data-ll-placement="compact"] { margin: 0; }
+[data-local-leet][data-ll-placement="compact"] .ll-rank-button { display: flex; align-items: baseline; gap: 4px; line-height: 14px; }
+[data-local-leet][data-ll-placement="compact"] .ll-rank-label,
+[data-local-leet][data-ll-placement="compact"] .ll-rank-value { font-size: 11px; line-height: 14px; }
+[data-local-leet][data-ll-placement="compact"] .ll-country-code,
+[data-local-leet][data-ll-placement="compact"] .ll-rank-value > span:nth-child(2) { display: none; }
 .ll-rank-button {
   appearance: none; display: block; padding: 0; border: 0; border-radius: 3px;
   background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;

@@ -33,6 +33,7 @@
     const description = core.describe(result, core.readGlobalRank(anchor));
     const lines = error ? [error, 'Reload this profile to try again.'] : [description.summary,
       description.date ? `Snapshot: ${description.date} (UTC).` : 'Reading the bundled ranking data.',
+      description.cadence,
       ...(result ? [description.notice,
         'Accounts without a declared country are excluded from country counts. Local Leet is independent of LeetCode.'] : [])];
     for (const [index, text] of lines.entries()) {
@@ -61,7 +62,7 @@
   }
 
   function clear() {
-    view?.host.remove(); details?.remove();
+    core.destroyRank(view); details?.remove();
     if (anchor?.row.isConnected) delete anchor.row.dataset.localLeetRow;
     anchor = view = details = identity = result = error = null;
     revision++;
@@ -76,7 +77,7 @@
     const found = core.locateGlobalRank(document);
     if (!found) { if (view && !view.host.isConnected) clear(); return; }
     if (anchor?.block !== found.block || !view?.host.isConnected) {
-      view?.host.remove(); closeDetails();
+      core.destroyRank(view); closeDetails();
       anchor = found;
       view = core.createRank(document, anchor, toggleDetails);
     }
@@ -107,6 +108,13 @@
   });
   const observer = new MutationObserver(records => {
     if (location.href !== href) { schedule(); return; }
+    const ownMutation = record => {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      if (target?.closest('[data-local-leet]')) return true;
+      const changed = [...record.addedNodes, ...record.removedNodes];
+      return changed.length > 0 && changed.every(node => node.nodeType === 1 && node.matches('[data-local-leet]'));
+    };
+    if (view?.host.isConnected && records.every(ownMutation)) return;
     if (!core.profileIdentity(location.href)) return;
     if (!view?.host.isConnected) {
       if (records.some(r => !r.target.parentElement?.closest('[data-local-leet]'))) schedule();

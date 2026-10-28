@@ -10,7 +10,8 @@ Built By [VoidHub](https://voidhub.co).
 2. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked** and select the extracted folder.
 3. Open a LeetCode profile. Click **Local Rank** for its country and snapshot date.
 
-Moving from 0.1.0 requires loading 0.2.0 once. Future **data** updates need no reload or reinstall.
+For code updates, replace the contents of the loaded folder and click **Reload** once in Chrome.
+Future **data** updates need no reload or reinstall.
 
 ## Updates
 
