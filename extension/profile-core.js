@@ -63,7 +63,7 @@
     resetPanelLayout(view);
     delete anchor.row.dataset.localLeetLayout;
     // Only our node is moved. React-owned badge, level and graph nodes stay intact.
-    if (view.host.parentElement !== anchor.row) anchor.block.after(view.host);
+    if (anchor.block.nextElementSibling !== view.host) anchor.block.after(view.host);
     view.host.dataset.llPlacement = 'inline';
     const outerWidth = node => {
       const style = win.getComputedStyle(node);

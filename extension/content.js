@@ -114,6 +114,8 @@
       const changed = [...record.addedNodes, ...record.removedNodes];
       return changed.length > 0 && changed.every(node => node.nodeType === 1 && node.matches('[data-local-leet]'));
     };
+    if (view?.host.isConnected && view.host.dataset.llPlacement === 'inline'
+      && anchor.block.nextElementSibling !== view.host) { schedule(); return; }
     if (view?.host.isConnected && records.every(ownMutation)) return;
     if (!core.profileIdentity(location.href)) return;
     if (!view?.host.isConnected) {

@@ -145,6 +145,18 @@ test('React-style badge removal restores it without duplicate requests', async t
   assert.equal(calls.length, 1);
 });
 
+test('native graph updates cannot swap the global and local rank', async t => {
+  const { document, calls } = fixture(t);
+  await wait(100);
+  const global = document.querySelector('.label').parentElement;
+  const local = document.querySelector('.ll-rank');
+  global.before(local);
+  document.querySelector('#chart').textContent = 'hover';
+  await wait(150);
+  assert.equal(global.nextElementSibling, local);
+  assert.equal(calls.length, 1);
+});
+
 test('unrelated chart mutations do not scan the profile or fetch new data', async t => {
   const { document, calls } = fixture(t);
   await wait(100);
