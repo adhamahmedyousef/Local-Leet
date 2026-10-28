@@ -1,0 +1,9 @@
+[project]
+name = "local-leet"
+version = "0.2.0"
+description = "Auditable LeetCode country ranking snapshots and constant-time lookups"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.ruff]
+line-length = 100

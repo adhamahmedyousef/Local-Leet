@@ -1,0 +1,32 @@
+[data-local-leet-row] { flex-wrap: wrap; row-gap: 8px; }
+[data-local-leet].ll-rank { flex: none; position: relative; }
+.ll-rank-button {
+  appearance: none; display: block; padding: 0; border: 0; border-radius: 3px;
+  background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.ll-rank-button:focus-visible { outline: 2px solid #ffa116; outline-offset: 4px; }
+.ll-rank-label { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
+.ll-country-code { font-size: 11px; }
+.ll-rank-value { white-space: nowrap; }
+.ll-rank-button:active { opacity: .75; }
+.ll-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.ll-denominator { opacity: .5; }
+[data-local-leet][data-stale="true"] .ll-rank-value::after { content: '*'; color: #b7791f; margin-left: 2px; }
+.dark [data-local-leet][data-stale="true"] .ll-rank-value::after { color: #ffc36b; }
+.ll-details {
+  position: fixed; z-index: 2147483646; width: min(300px, calc(100vw - 24px));
+  box-sizing: border-box; margin: 0; padding: 14px 16px; border-radius: 8px;
+  border: 1px solid #e5e7eb; background: #fff; color: #262626;
+  box-shadow: 0 6px 20px #0000001f; font: 12px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.dark .ll-details { background: #282828; color: #eff1f6; border-color: #484848; box-shadow: 0 6px 20px #0005; }
+.ll-details[hidden] { display: none; }
+.ll-details h2 { font-size: 13px; margin: 0 22px 8px 0; font-weight: 600; }
+.ll-details p { margin: 6px 0 0; }
+.ll-details .ll-detail-secondary { color: #595959; }
+.dark .ll-details .ll-detail-secondary { color: #b7b9be; }
+.ll-details a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.ll-details-close { position: absolute; top: 5px; right: 5px; padding: 4px 8px; border: 0; border-radius: 4px;
+  color: inherit; background: transparent; font: inherit; font-size: 18px; cursor: pointer; }
+.ll-details-close:focus-visible { outline: 2px solid #ffa116; }

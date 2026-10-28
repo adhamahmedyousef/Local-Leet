@@ -1,0 +1,36 @@
+VoidHub Source-Available License 1.0
+Copyright (c) 2026 VoidHub. All rights reserved.
+https://voidhub.co
+
+1. Permission. You may read this project's source, use the official Local Leet
+extension for personal non-commercial purposes, and make private modifications
+solely to test it or submit contributions to the official repository. GitHub
+forks used to submit pull requests are permitted, including rights granted by
+GitHub's terms for public repositories.
+
+2. Restrictions. No other permission is granted to reuse this software or its
+parts in another product, redistribute it or modified versions, rebrand it,
+sell it, offer it as a service, or use it commercially. These uses require
+VoidHub's prior written permission. Merely adding attribution is not permission.
+
+3. Attribution. Keep this license, copyright notices and the visible credit
+"Built By VoidHub", linking to https://voidhub.co, intact. Any separately
+authorized use must acknowledge VoidHub and link to https://voidhub.co unless
+VoidHub agrees otherwise in writing. No trademark rights are granted.
+
+4. Contributions. By submitting a contribution, you confirm that you may license
+it and grant VoidHub a perpetual, worldwide, non-exclusive, royalty-free license
+to use, modify, distribute and sublicense it as part of this project. You retain
+copyright in your contribution. A pull request does not grant redistribution
+rights in the rest of the project.
+
+5. Third-party material. LeetCode names, public ranking facts, and third-party
+dependencies remain subject to their respective rights and licenses. VoidHub
+does not claim ownership of LeetCode or exclusive rights over public facts.
+
+6. No warranty. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+TO THE EXTENT PERMITTED BY LAW, THE AUTHORS ARE NOT LIABLE FOR CLAIMS, DAMAGES
+OR OTHER LIABILITY ARISING FROM ITS USE.
+
+This is a restricted source-available license, not an OSI open-source license.
+For permissions, contact VoidHub through https://voidhub.co.
