@@ -76,7 +76,8 @@
     if (identity && (identity.username !== next.username || identity.region !== next.region)) clear();
     const found = core.locateGlobalRank(document);
     if (!found) { if (view && !view.host.isConnected) clear(); return; }
-    if (anchor?.block !== found.block || !view?.host.isConnected) {
+    if (anchor?.block !== found.block || !view?.host.isConnected || !view.host.contains(view.button)
+      || !view.button.contains(view.number)) {
       core.destroyRank(view); closeDetails();
       anchor = found;
       view = core.createRank(document, anchor, toggleDetails);
@@ -108,6 +109,11 @@
   });
   const observer = new MutationObserver(records => {
     if (location.href !== href) { schedule(); return; }
+    if (records.some(r => r.type === 'attributes' && r.target !== view?.panels?.card
+      && !r.target.closest('[data-local-leet]')
+      && (r.target.contains(anchor?.row) || anchor?.row.parentElement?.parentElement?.contains(r.target)))) {
+      schedule(); return;
+    }
     const ownMutation = record => {
       const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
       if (target?.closest('[data-local-leet]')) return true;
@@ -116,15 +122,17 @@
     };
     if (view?.host.isConnected && view.host.dataset.llPlacement === 'inline'
       && anchor.block.nextElementSibling !== view.host) { schedule(); return; }
-    if (view?.host.isConnected && records.every(ownMutation)) return;
+    if (view?.host.isConnected && view.host.contains(view.button) && view.button.contains(view.number)
+      && records.every(ownMutation)) return;
     if (!core.profileIdentity(location.href)) return;
     if (!view?.host.isConnected) {
       if (records.some(r => !r.target.parentElement?.closest('[data-local-leet]'))) schedule();
       return;
     }
-    if (records.some(r => anchor.block.contains(r.target))) schedule();
+    if (records.some(r => anchor.row.contains(r.target) || r.target.contains?.(anchor.row))) schedule();
   });
-  const observe = () => observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  const observe = () => observer.observe(document.body, { childList: true, subtree: true, characterData: true,
+    attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
   observe();
   addEventListener('popstate', schedule);
   addEventListener('pageshow', () => { observe(); schedule(); });

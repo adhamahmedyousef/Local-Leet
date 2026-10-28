@@ -28,6 +28,12 @@
       if (!block || !value || !/\d/.test(value.textContent)) continue;
       const row = block.parentElement;
       if (!row?.textContent.includes('Contest Rating')) continue;
+      let visible = true;
+      for (let node = row; node; node = node.parentElement) {
+        const style = document.defaultView.getComputedStyle(node);
+        if (style.display === 'none' || style.visibility === 'hidden') { visible = false; break; }
+      }
+      if (!visible) continue;
       return { label, block, value, row };
     }
     return null;
@@ -60,6 +66,7 @@
     if (!view.host.isConnected) return;
     const { anchor } = view;
     const win = view.host.ownerDocument.defaultView;
+    view.panels ||= nativePanels(anchor.row);
     resetPanelLayout(view);
     delete anchor.row.dataset.localLeetLayout;
     // Only our node is moved. React-owned badge, level and graph nodes stay intact.
@@ -175,12 +182,25 @@
     const view = { host, button, code, number, total, status, anchor, panels: nativePanels(anchor.row) };
     const Resize = document.defaultView.ResizeObserver;
     if (Resize) {
-      let lastWidth = -1;
+      const widths = new WeakMap();
       view.resizeObserver = new Resize(entries => {
-        const width = entries[0]?.contentRect.width;
-        if (width != null && Math.abs(width - lastWidth) > .5) { lastWidth = width; layoutRank(view); }
+        let changed = false;
+        for (const entry of entries) {
+          const width = entry.contentRect.width;
+          if (Math.abs(width - (widths.get(entry.target) ?? -1)) > .5) {
+            widths.set(entry.target, width); changed = true;
+          }
+        }
+        if (changed) layoutRank(view);
       });
       view.resizeObserver.observe(view.panels?.card || anchor.row.parentElement);
+      for (const child of anchor.row.children) {
+        if (child !== host) view.resizeObserver.observe(child);
+      }
+    }
+    document.fonts?.ready.then(() => layoutRank(view));
+    for (const image of anchor.row.querySelectorAll('img')) {
+      if (!image.complete) image.addEventListener('load', () => layoutRank(view), { once: true });
     }
     return view;
   }

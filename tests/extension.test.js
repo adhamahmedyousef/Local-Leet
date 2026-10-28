@@ -157,6 +157,36 @@ test('native graph updates cannot swap the global and local rank', async t => {
   assert.equal(calls.length, 1);
 });
 
+test('React can clear the injected host without permanently hiding the rank', async t => {
+  const { document, calls } = fixture(t);
+  await wait(100);
+  document.querySelector('.ll-rank').replaceChildren();
+  await wait(150);
+  assert.equal(document.querySelector('[data-ll-number]').textContent, '230');
+  assert.equal(document.querySelectorAll('.ll-rank').length, 1);
+  assert.equal(calls.length, 1);
+});
+
+test('hover switches rank to the visible duplicate header and restores it on leave', async t => {
+  const { document, calls } = fixture(t);
+  await wait(100);
+  const original = document.querySelector('[data-local-leet-row]');
+  const alternate = original.cloneNode(true);
+  alternate.querySelector('.ll-rank').remove();
+  alternate.style.display = 'none';
+  original.after(alternate);
+  original.style.display = 'none';
+  alternate.style.display = 'flex';
+  await wait(150);
+  assert.ok(alternate.querySelector('.ll-rank'));
+  original.style.display = 'flex';
+  alternate.style.display = 'none';
+  await wait(150);
+  assert.ok(original.querySelector('.ll-rank'));
+  assert.equal(document.querySelectorAll('.ll-rank').length, 1);
+  assert.equal(calls.length, 1);
+});
+
 test('unrelated chart mutations do not scan the profile or fetch new data', async t => {
   const { document, calls } = fixture(t);
   await wait(100);
