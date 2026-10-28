@@ -18,6 +18,34 @@ concurrency:
   group: ranking-data
   cancel-in-progress: false
 jobs:
+  keepalive:
+    if: github.repository == 'adhamahmedyousef/Local-Leet' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      actions: write
+    steps:
+      - name: Renew this workflow without repository commits
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import urllib.request
+          request = urllib.request.Request(
+              'https://api.github.com/repos/adhamahmedyousef/Local-Leet/actions/workflows/refresh.yml/enable',
+              method='PUT',
+              headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+              },
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              if response.status != 204:
+                  raise RuntimeError('Workflow renewal failed')
+          print('Refresh workflow renewed; no data collected or commits created.')
+          PY
   collect:
     if: github.repository == 'adhamahmedyousef/Local-Leet' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

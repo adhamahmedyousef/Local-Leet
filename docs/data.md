@@ -7,8 +7,11 @@ are invented. See the displayed snapshot date before interpreting a rank.
 
 The refresh workflow runs on alternate UTC dates, anchored on 28 October 2026. A daily cron gates
 the job to preserve a true two-day cadence across month boundaries. GitHub scheduling can be delayed.
-GitHub may disable public-repository schedules after 60 days without repository activity; the owner
-must re-enable the workflow if that happens.
+An independent keepalive job preemptively renews this workflow through GitHub's enable API on
+every trigger, including skipped collection days. It uses only the job's short-lived Actions
+token, creates no commits and keeps running even if data collection fails. No personal token
+or manual inactivity reset is required. This addresses inactivity expiry, not GitHub outages
+or an owner deliberately disabling the workflow.
 The next scheduled collection after initial publication is 30 October 2026 at approximately 05:17 UTC.
 
 Each run collects a fresh dataset, rejects missing pages, duplicate identities, rank gaps, invalid
