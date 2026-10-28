@@ -19,6 +19,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   collect:
+    if: github.repository == 'adhamahmedyousef/Local-Leet' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     outputs:
@@ -49,7 +50,7 @@ jobs:
           retention-days: 1
   deploy:
     needs: collect
-    if: needs.collect.outputs.publish == 'true'
+    if: github.repository == 'adhamahmedyousef/Local-Leet' && github.ref == 'refs/heads/main' && needs.collect.outputs.publish == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
