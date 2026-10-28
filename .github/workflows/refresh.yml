@@ -8,6 +8,10 @@ on:
         description: Deploy the verified initial release instead of collecting again
         type: boolean
         default: false
+      verify_source:
+        description: Check source access only; do not collect or publish
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -31,10 +35,12 @@ jobs:
         env:
           SCHEDULED: ${{ github.event_name == 'schedule' && 'true' || 'false' }}
           BOOTSTRAP: ${{ inputs.bootstrap && 'true' || 'false' }}
+          VERIFY_SOURCE: ${{ inputs.verify_source && 'true' || 'false' }}
         run: |
           args=()
           if [ "$SCHEDULED" = true ]; then args+=(--scheduled); fi
           if [ "$BOOTSTRAP" = true ]; then args+=(--bootstrap); fi
+          if [ "$VERIFY_SOURCE" = true ]; then args+=(--probe); fi
           python scripts/refresh-data.py "${args[@]}"
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         if: steps.data.outputs.publish == 'true'

@@ -19,7 +19,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--bootstrap', action='store_true')
     parser.add_argument('--scheduled', action='store_true')
+    parser.add_argument('--probe', action='store_true', help='Check anonymous source access without collecting or publishing')
     args = parser.parse_args()
+    if args.probe:
+        from localleet.source import Client
+        first = Client().page(1)
+        print(json.dumps({'sourceReachable': True, 'rows': len(first['rankingNodes']),
+                          'totalPages': first['totalPages']}))
+        return
     if args.scheduled and not scheduled_today():
         print('Not a refresh day. No ranking requests made.')
         return
