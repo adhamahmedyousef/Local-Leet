@@ -29,11 +29,12 @@ def open_database(path):
     return database
 
 
-def save_page(database, number, data):
+def save_page(database, number, data, *, commit=True):
     raw = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()
     database.execute("INSERT OR REPLACE INTO pages VALUES (?, ?, ?, ?)",
                      (number, utcnow(), hashlib.sha256(raw).hexdigest(), zlib.compress(raw)))
-    database.commit()
+    if commit:
+        database.commit()
 
 
 def collect(database_path, workers=3, interval=1.0, max_pages=None, batch_size=20):
@@ -66,13 +67,21 @@ def collect(database_path, workers=3, interval=1.0, max_pages=None, batch_size=2
                       "totalPages": total_pages, "reportedUsers": first["totalUsers"],
                       "workers": workers, "requestIntervalSeconds": interval}), flush=True)
     error = None
+    fetch_seconds = write_seconds = 0.0
+    fetched_batches = 0
+
+    def fetch_batch(batch):
+        before = time.monotonic()
+        result = client.pages(batch)
+        return result, time.monotonic() - before
+
     with ThreadPoolExecutor(max_workers=workers) as pool:
         pending = {}
 
         def submit_next():
             batch = next(batches, None)
             if batch is not None:
-                pending[pool.submit(client.pages, batch)] = batch
+                pending[pool.submit(fetch_batch, batch)] = batch
 
         for _ in range(workers):
             submit_next()
@@ -81,16 +90,24 @@ def collect(database_path, workers=3, interval=1.0, max_pages=None, batch_size=2
             for future in done:
                 pending.pop(future)
                 try:
-                    for number, data in future.result().items():
-                        if data["totalPages"] != total_pages:
-                            raise RuntimeError("Source totalPages changed during collection")
-                        if not data["rankingNodes"]:
-                            raise RuntimeError(f"Empty advertised page {number}")
-                        save_page(database, number, data)
-                        completed += 1
+                    results, duration = future.result()
+                    fetch_seconds += duration
+                    fetched_batches += 1
+                    before = time.monotonic()
+                    with database:
+                        for number, data in results.items():
+                            if data["totalPages"] != total_pages:
+                                raise RuntimeError("Source totalPages changed during collection")
+                            if not data["rankingNodes"]:
+                                raise RuntimeError(f"Empty advertised page {number}")
+                            save_page(database, number, data, commit=False)
+                    completed += len(results)
+                    write_seconds += time.monotonic() - before
                     if completed % 100 < batch_size or not pending:
                         print(json.dumps({"event": "progress", "savedPages": completed,
                                           "totalPages": total_pages,
+                                          "meanBatchFetchSeconds": round(fetch_seconds / fetched_batches, 3),
+                                          "totalWriteSeconds": round(write_seconds, 3),
                                           "elapsedSeconds": round(time.monotonic() - started, 1)}),
                               flush=True)
                 except Exception as caught:

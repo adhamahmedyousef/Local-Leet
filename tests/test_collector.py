@@ -11,6 +11,20 @@ from test_index import node, page
 
 
 class CollectorTests(unittest.TestCase):
+    def test_invalid_batch_rolls_back_all_its_pages(self):
+        first = page([node(1)], 3, 3, 1)
+        batch = {2: page([node(2)], 3, 3, 1), 3: page([], 3, 3, 1)}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'raw.sqlite3'
+            with patch.object(Client, 'page', return_value=first), patch.object(
+                Client, 'pages', return_value=batch
+            ), redirect_stdout(io.StringIO()):
+                with self.assertRaisesRegex(RuntimeError, 'Empty advertised'):
+                    collect(path, workers=1)
+            connection = open_database(path)
+            self.assertEqual(connection.execute('SELECT number FROM pages').fetchall(), [(1,)])
+            connection.close()
+
     def test_client_batch_contract(self):
         client = Client()
         with patch.object(client, "request", return_value={

@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import time
+import http.client
 import urllib.error
 import urllib.request
 import zipfile
@@ -19,11 +21,24 @@ def refreshed_today(meta, today=None):
 
 def download(url, limit):
     request = urllib.request.Request(url, headers={'User-Agent': 'Local-Leet-data-publisher'})
-    with urllib.request.urlopen(request, timeout=45) as response:
-        raw = response.read(limit + 1)
-    if len(raw) > limit:
-        raise ValueError('Oversized public data response')
-    return raw
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(request, timeout=45) as response:
+                raw = response.read(limit + 1)
+            if len(raw) > limit:
+                raise ValueError('Oversized public data response')
+            return raw
+        except urllib.error.HTTPError as error:
+            error.close()
+            if error.code not in (500, 502, 503, 504) or attempt == 4:
+                raise
+        except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.IncompleteRead):
+            if attempt == 4:
+                raise
+        delay = 2 ** (attempt + 1)
+        print(json.dumps({'event': 'downloadRetry', 'attempt': attempt + 1,
+                          'delaySeconds': delay, 'url': url}), flush=True)
+        time.sleep(delay)
 
 
 def digest(raw):
