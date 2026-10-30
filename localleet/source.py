@@ -62,6 +62,8 @@ class Client:
             connection.request("POST", "/graphql/", body=body, headers={
                 "Content-Type": "application/json",
                 "User-Agent": "LocalLeet/0.1 (public ranking research)",
+                "Cache-Control": "no-cache",
+                "Pragma": "no-cache",
             })
             response = connection.getresponse()
             raw = response.read()

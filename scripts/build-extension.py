@@ -67,6 +67,8 @@ def main():
     for name in source_names:
         shutil.copy2(ROOT / 'extension' / name, destination / name)
     shutil.copy2(ROOT / 'LICENSE', destination / 'LICENSE')
+    (destination / 'assets').mkdir(exist_ok=True)
+    shutil.copy2(ROOT / 'extension/assets/logo.png', destination / 'assets/logo.png')
     (destination / 'icons').mkdir(exist_ok=True)
     for size in (16, 32, 48, 128):
         (destination / 'icons' / f'{size}.png').write_bytes(png_icon(size))

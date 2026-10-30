@@ -19,6 +19,7 @@ for source in (ROOT / 'extension').iterdir():
     if source.suffix in ('.js', '.css', '.html', '.json'):
         assert source.read_bytes() == (folder / source.name).read_bytes(), f'Stale source: {source.name}'
 metadata = json.loads((folder / 'data/metadata.json').read_text())
+assert (ROOT / 'extension/assets/logo.png').read_bytes() == (folder / 'assets/logo.png').read_bytes()
 entries = 0
 for shard, descriptor in metadata['shards'].items():
     raw = (folder / 'data' / f'{shard}.json.gz').read_bytes()

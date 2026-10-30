@@ -62,8 +62,8 @@ test('details are clickable, keyboard dismissible, and explain the snapshot scop
   assert.equal(details.hidden, false);
   assert.match(details.textContent, /28 Oct 2026/);
   assert.match(details.textContent, /declaring that country/);
-  assert.match(button.title, /updated every two days/);
-  assert.match(details.textContent, /updated every two days/);
+  assert.match(button.title, /updated daily/);
+  assert.match(details.textContent, /updated daily/);
   assert.equal(button.getAttribute('aria-expanded'), 'true');
   document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
   assert.equal(details.hidden, true);

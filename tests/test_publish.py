@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 import gzip
 import hashlib
 import json
@@ -7,16 +7,30 @@ import tempfile
 import unittest
 import zipfile
 
-from localleet.publish import ANCHOR, scheduled_today, from_package
+from localleet.publish import refreshed_today, from_package
+from localleet.verify import check_profile_freshness
 
 
 class PublishTests(unittest.TestCase):
-    def test_two_day_cadence_crosses_month_and_year_boundaries(self):
-        for offset in range(400):
-            self.assertEqual(scheduled_today(ANCHOR + timedelta(days=offset)), offset % 2 == 0)
-        self.assertTrue(scheduled_today(date(2026, 10, 30)))
-        self.assertTrue(scheduled_today(date(2026, 11, 1)))
-        self.assertFalse(scheduled_today(date(2026, 10, 31)))
+    def test_daily_refresh_and_backup_skip_use_utc_date(self):
+        meta = {'collectedAt': '2026-10-30T11:41:41Z'}
+        self.assertTrue(refreshed_today(meta, date(2026, 10, 30)))
+        self.assertFalse(refreshed_today(meta, date(2026, 10, 31)))
+        self.assertFalse(refreshed_today(meta, date(2026, 11, 1)))
+        self.assertTrue(refreshed_today({'collectedAt': '2026-10-31T01:00:00+03:00'}, date(2026, 10, 30)))
+
+    def test_profile_freshness_blocks_old_source_even_when_internal_checks_pass(self):
+        class Client:
+            def request(self, query):
+                return {'data': {'userContestRanking': {'globalRanking': 97444, 'rating': 1745.122}}}
+        node = {'user': {'username': 'alice'}, 'currentGlobalRanking': 108215, 'currentRating': '1724.845'}
+        with self.assertRaisesRegex(ValueError, 'refusing stale'):
+            check_profile_freshness(Client(), node)
+        node.update(currentGlobalRanking=97444, currentRating='1745.122')
+        self.assertTrue(check_profile_freshness(Client(), node)['matches'])
+        node['currentRating'] = '1744'
+        with self.assertRaisesRegex(ValueError, 'refusing stale'):
+            check_profile_freshness(Client(), node)
 
     def package(self, root, corrupt=False):
         payload = gzip.compress(b'{"US:alice":[1,1,"EG","1700"]}', mtime=0)

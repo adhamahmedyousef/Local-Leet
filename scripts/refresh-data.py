@@ -1,4 +1,4 @@
-"""Two-day refresh pipeline, validated before the Pages deployment can start."""
+"""Daily refresh pipeline, validated before the Pages deployment can start."""
 import argparse
 from datetime import datetime, timezone
 import json
@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 from localleet.collect import collect
 from localleet.build import build
 from localleet.verify import verify
-from localleet.publish import (scheduled_today, download, digest, keep_previous,
+from localleet.publish import (refreshed_today, DATA_ROOT, download, digest, keep_previous,
                               from_package, from_snapshot)
 
 
@@ -27,9 +27,14 @@ def main():
         print(json.dumps({'sourceReachable': True, 'rows': len(first['rankingNodes']),
                           'totalPages': first['totalPages']}))
         return
-    if args.scheduled and not scheduled_today():
-        print('Not a refresh day. No ranking requests made.')
-        return
+    if args.scheduled:
+        current = json.loads(download(DATA_ROOT + 'current.json', 2048))
+        raw = download(DATA_ROOT + f"snapshots/{current['snapshotId']}/metadata.json", 200_000)
+        if digest(raw) != current['metadataSha256'] or len(raw) != current['metadataBytes']:
+            raise ValueError('Invalid current metadata')
+        if refreshed_today(json.loads(raw)):
+            print('Already published a collection from today; skipping backup trigger.')
+            return
     site = ROOT / 'dist/site'
     if site.exists():
         raise ValueError('Use a fresh staging directory; an existing site must not be overwritten')

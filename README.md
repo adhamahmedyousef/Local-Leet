@@ -15,7 +15,7 @@ Future **data** updates need no reload or reinstall.
 
 ## Updates
 
-Ranking data refreshes every **two days** through GitHub Actions and Pages. Chrome checks hourly
+Ranking data refreshes **daily** through GitHub Actions and Pages. Chrome checks hourly
 and updates open profiles automatically. Cached data and a bundled snapshot work offline.
 Countries must be declared by users; unknown countries display `—`. Ranks describe dated data,
 not guaranteed live standings. [Data details](docs/data.md).

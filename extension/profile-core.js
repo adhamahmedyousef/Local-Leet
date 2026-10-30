@@ -142,7 +142,7 @@
           : `Rank ${format.format(user.localRank)} of ${format.format(user.countryTotal)} in ${countryNames.of(user.country)}, among accounts declaring that country.`,
       notice: stale ? 'The profile’s global rank has changed. This is the saved local rank, not a live recalculation.'
         : 'Based on a saved snapshot, not live standings.',
-      cadence: 'Ranking data is updated every two days. The extension checks for new data every hour.',
+      cadence: 'Ranking data is updated daily. The extension checks for new data every hour.',
     };
   }
 

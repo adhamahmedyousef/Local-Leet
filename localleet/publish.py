@@ -1,6 +1,6 @@
 """Publish verified, immutable compact data for GitHub Pages; no tokens are needed."""
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 import gzip
 import hashlib
 import json
@@ -11,12 +11,10 @@ import urllib.request
 import zipfile
 
 DATA_ROOT = 'https://adhamahmedyousef.github.io/Local-Leet/'
-ANCHOR = date(2026, 10, 28)
-
-
-def scheduled_today(today=None):
-    """Every other UTC date, without month-boundary cron irregularities."""
-    return ((today or datetime.now(timezone.utc).date()) - ANCHOR).days % 2 == 0
+def refreshed_today(meta, today=None):
+    """Skip backup triggers only after a successful collection on this UTC date."""
+    collected = datetime.fromisoformat(meta['collectedAt'].replace('Z', '+00:00'))
+    return collected.astimezone(timezone.utc).date() == (today or datetime.now(timezone.utc).date())
 
 
 def download(url, limit):

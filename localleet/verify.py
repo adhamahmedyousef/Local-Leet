@@ -16,6 +16,17 @@ from .collect import utcnow
 from .source import Client
 
 
+def check_profile_freshness(client, node):
+    username = node['user']['username']
+    query = ('query { userContestRanking(username: ' + json.dumps(username)
+             + ') { globalRanking rating } }')
+    profile = (client.request(query).get('data') or {}).get('userContestRanking')
+    if (not profile or profile.get('globalRanking') != node['currentGlobalRanking']
+            or abs(Decimal(str(profile.get('rating'))) - Decimal(str(node['currentRating']))) > Decimal('0.000001')):
+        raise ValueError(f'Profile and ranking snapshot disagree for {username}; refusing stale publication')
+    return {'username': username, 'matches': True}
+
+
 def verify(database_path, root, live=False):
     start = time.perf_counter()
     root = Path(root)
@@ -76,6 +87,7 @@ def verify(database_path, root, live=False):
         if username == "Adham0X1Star":
             example = record
     sentinels = []
+    profiles = []
     if live:
         client = Client(1.0)
         page_count = manifest["sourceMetadata"]["totalPages"]
@@ -87,13 +99,21 @@ def verify(database_path, root, live=False):
             if fetched[number] != old:
                 raise ValueError(f"Source sentinel changed: page {number}; snapshot is stale")
             sentinels.append({"page": number, "matches": True})
+        candidates = [n for n in samples if n['dataRegion'] == 'US']
+        chosen = candidates[:1] + candidates[len(candidates)//2:len(candidates)//2+1]
+        chosen += [n for n in candidates if n['user']['username'] == 'Adham0X1Star']
+        checked = set()
+        for node in chosen:
+            if node['user']['username'] not in checked:
+                profiles.append(check_profile_freshness(client, node))
+                checked.add(node['user']['username'])
     database.close()
     result = {"verifiedAt": utcnow(), "snapshotId": manifest["snapshotId"],
               "sourceRows": rows, "shardsVerified": len(shard_sizes),
               "lookupEntries": total_entries, "independentRankSamples": len(samples),
               "shardBytes": {"min": min(shard_sizes), "max": max(shard_sizes),
                              "total": sum(shard_sizes)},
-              "liveSentinels": sentinels, "example": example,
+              "liveSentinels": sentinels, "liveProfiles": profiles, "example": example,
               "elapsedSeconds": round(time.perf_counter() - start, 3),
               "limitation": "Sampled live checks do not prove an atomic source snapshot."}
     (root / "verification.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
