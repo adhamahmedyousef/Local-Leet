@@ -35,7 +35,7 @@
       description.date ? `Snapshot: ${description.date} (UTC).` : 'Reading the bundled ranking data.',
       description.cadence,
       ...(result ? [description.notice,
-        'Accounts without a declared country are excluded from country counts. Local Leet is independent of LeetCode.'] : [])];
+        'Accounts without a declared country are excluded from country counts. Local-Leet++ is independent of LeetCode.'] : [])];
     for (const [index, text] of lines.entries()) {
       const p = document.createElement('p'); p.textContent = text;
       if (index) p.className = 'll-detail-secondary';
@@ -92,7 +92,7 @@
       result = response.result;
     } catch {
       if (token !== revision) return;
-      error = 'Local rank is unavailable. Reload the profile after checking that Local Leet is enabled.';
+      error = 'Local rank is unavailable. Reload the profile after checking that Local-Leet++ is enabled.';
       result = { user: null };
     }
     render();

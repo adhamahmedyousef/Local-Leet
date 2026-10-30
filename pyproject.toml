@@ -1,6 +1,6 @@
 [project]
 name = "local-leet"
-version = "0.2.7"
+version = "0.2.8"
 description = "Auditable LeetCode country ranking snapshots and constant-time lookups"
 requires-python = ">=3.12"
 dependencies = []

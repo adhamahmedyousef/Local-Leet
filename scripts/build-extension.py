@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import shutil
 import struct
+import tempfile
 import sys
 import zlib
 import zipfile
@@ -40,7 +41,20 @@ def png_icon(size):
 
 def main():
     release = None
-    if '--from-release' in sys.argv:
+    if '--from-pages' in sys.argv:
+        sys.path.insert(0, str(ROOT))
+        from localleet.publish import keep_previous
+        with tempfile.TemporaryDirectory() as temporary:
+            cached = keep_previous(temporary)
+            if not cached:
+                raise ValueError('No published ranking snapshot')
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, 'w') as package:
+                folder = Path(temporary) / 'snapshots' / cached['snapshotId']
+                for file in folder.iterdir():
+                    package.write(file, f'data/{file.name}')
+            release = zipfile.ZipFile(io.BytesIO(buffer.getvalue()))
+    elif '--from-release' in sys.argv:
         sys.path.insert(0, str(ROOT))
         from localleet.publish import download, digest
         config = json.loads((ROOT / 'bootstrap.json').read_text())
@@ -48,6 +62,7 @@ def main():
         if digest(raw) != config['sha256']:
             raise ValueError('Bootstrap release integrity failure')
         release = zipfile.ZipFile(io.BytesIO(raw))
+    if release:
         cached = json.loads(release.read('data/metadata.json'))
         manifest = {'snapshotId': cached['snapshotId'], 'collectionFinishedAt': cached['collectedAt'],
                     'sourceRows': cached['sourceRows'], 'unknownCountryUsers': cached['unknownCountryRows'],

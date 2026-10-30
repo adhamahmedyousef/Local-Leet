@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Local Leet",
-  "version": "0.2.7",
+  "name": "Local-Leet++",
+  "version": "0.2.8",
   "description": "Country contest ranks beside LeetCode's Global Ranking. Automatic data updates. Built By VoidHub.",
   "homepage_url": "https://voidhub.co",
   "permissions": ["storage", "alarms"],
@@ -14,6 +14,6 @@
     "css": ["content.css"],
     "run_at": "document_idle"
   }],
-  "action": { "default_title": "Local Leet", "default_popup": "popup.html" },
+  "action": { "default_title": "Local-Leet++", "default_popup": "popup.html" },
   "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" }
 }

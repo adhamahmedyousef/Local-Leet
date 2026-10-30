@@ -1,4 +1,4 @@
-# Local Leet
+# Local-Leet++
 
 Your country contest rank beside LeetCode's Global Ranking.
 
@@ -37,3 +37,7 @@ Source, tests and workflows only; datasets and builds stay out of Git. [Setup](d
 Source-available, not an unrestricted open-source license. Rights are reserved to VoidHub.
 Reuse or redistribution requires written permission; attribution alone is insufficient.
 Pull requests are welcome. Read [LICENSE](LICENSE) and [CONTRIBUTING](CONTRIBUTING.md).
+
+## Privacy
+
+[Privacy policy](PRIVACY.md). Store submission materials are in [store-preparation](store-preparation/listing-draft.md).
