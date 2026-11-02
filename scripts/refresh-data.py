@@ -52,7 +52,7 @@ def main():
         run_id = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
         database = ROOT / f'data/raw/{run_id}.sqlite3'
         data = ROOT / f'data/refresh-{run_id}'
-        collect(database, workers=3, interval=.5, batch_size=20)
+        collect(database, workers=2, interval=1.0, batch_size=20)
         meta = build(database, data)
         if previous and meta['sourceRows'] < previous['sourceRows'] * .8:
             raise ValueError('Unexpected source coverage drop; manual review is required')
